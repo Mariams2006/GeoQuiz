@@ -9,6 +9,7 @@ GeoQuiz is an Android quiz application created for my Mobile Application class.
 - Keeps track of the user's score
 - Prevents the same question from being answered more than once
 - Next button to move through the quiz
+- Restart Quiz button to reset the quiz and play again
 - Final score displayed after completing the quiz
 - Cheat button that allows the user to view the answer
 - Tracks whether the user used the cheat feature
