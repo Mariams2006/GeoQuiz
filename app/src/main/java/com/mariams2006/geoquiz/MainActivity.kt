@@ -3,6 +3,7 @@ package com.mariams2006.geoquiz
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var falseButton: Button
     private lateinit var nextButton: Button
     private lateinit var cheatButton: Button
+    private lateinit var restartButton: Button
 
     private val questions = arrayOf(
         "Canberra is the capital of Australia.",
@@ -40,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private var score = 0
     private var answered = false
     private var cheated = false
+    private var quizFinished = false
 
     private val cheatActivityLauncher =
         registerForActivityResult(
@@ -67,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         falseButton = findViewById(R.id.falseButton)
         nextButton = findViewById(R.id.nextButton)
         cheatButton = findViewById(R.id.cheatButton)
+        restartButton = findViewById(R.id.restartButton)
 
         if (savedInstanceState != null) {
             currentQuestion =
@@ -80,9 +84,16 @@ class MainActivity : AppCompatActivity() {
 
             cheated =
                 savedInstanceState.getBoolean("cheated", false)
+
+            quizFinished =
+                savedInstanceState.getBoolean("quizFinished", false)
         }
 
-        updateQuestion()
+        if (quizFinished) {
+            showFinishedQuiz()
+        } else {
+            updateQuestion()
+        }
 
         trueButton.setOnClickListener {
             checkAnswer(true)
@@ -104,14 +115,14 @@ class MainActivity : AppCompatActivity() {
 
             } else {
 
+                quizFinished = true
+                showFinishedQuiz()
+
                 Toast.makeText(
                     this,
                     "Quiz complete! Your score is $score out of ${questions.size}",
                     Toast.LENGTH_LONG
                 ).show()
-
-                scoreTextView.text =
-                    "Final Score: $score / ${questions.size}"
             }
         }
 
@@ -135,12 +146,15 @@ class MainActivity : AppCompatActivity() {
 
             cheatActivityLauncher.launch(intent)
         }
+
+        restartButton.setOnClickListener {
+            restartQuiz()
+        }
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
 
         if (answered) {
-
             Toast.makeText(
                 this,
                 "You already answered this question.",
@@ -185,6 +199,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateQuestion() {
 
+        quizFinished = false
+
         questionTextView.text =
             questions[currentQuestion]
 
@@ -199,6 +215,49 @@ class MainActivity : AppCompatActivity() {
         } else {
             nextButton.text = "NEXT"
         }
+
+        trueButton.visibility = View.VISIBLE
+        falseButton.visibility = View.VISIBLE
+        nextButton.visibility = View.VISIBLE
+        cheatButton.visibility = View.VISIBLE
+
+        restartButton.visibility = View.GONE
+    }
+
+    private fun showFinishedQuiz() {
+
+        progressTextView.text =
+            "Quiz Complete!"
+
+        questionTextView.text =
+            "You finished all ${questions.size} questions."
+
+        scoreTextView.text =
+            "Final Score: $score / ${questions.size}"
+
+        trueButton.visibility = View.GONE
+        falseButton.visibility = View.GONE
+        nextButton.visibility = View.GONE
+        cheatButton.visibility = View.GONE
+
+        restartButton.visibility = View.VISIBLE
+    }
+
+    private fun restartQuiz() {
+
+        currentQuestion = 0
+        score = 0
+        answered = false
+        cheated = false
+        quizFinished = false
+
+        updateQuestion()
+
+        Toast.makeText(
+            this,
+            "Quiz restarted!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -222,6 +281,11 @@ class MainActivity : AppCompatActivity() {
         outState.putBoolean(
             "cheated",
             cheated
+        )
+
+        outState.putBoolean(
+            "quizFinished",
+            quizFinished
         )
     }
 }
